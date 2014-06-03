@@ -1,0 +1,41 @@
+user root;
+
+events {
+  worker_connections 1024;
+}
+
+http {
+  sendfile on;
+  tcp_nopush on;
+  tcp_nodelay on;
+  keepalive_timeout 65;
+  types_hash_max_size 2048;
+
+  include /etc/nginx/mime.types;
+  default_type application/octet-stream;
+
+  access_log /var/log/proxxy.log;
+  error_log  /var/log/proxxy.log;
+
+  proxy_temp_path   /var/cache/proxxy/tmp;
+
+  {%- for name, params in config['backends'].iteritems() %}
+  proxy_cache_path  /var/cache/proxxy/{{ name }} levels=1:2 keys_zone={{ name }}:8m max_size={{ params['size'] }} inactive={{ params['ttl'] }};
+  {%- endfor %}
+
+  server {
+    listen 80;
+
+    location / {
+      return 404;
+    }
+
+    {% for name, params in config['backends'].iteritems() %}
+    location /{{ name }} {
+      proxy_pass {{ params['path'] }};
+      proxy_cache {{ name }};
+      proxy_cache_valid {{ params['ttl'] }};
+    }
+    {% endfor %}
+  }
+}
