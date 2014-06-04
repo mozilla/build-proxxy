@@ -19,23 +19,28 @@ http {
 
   proxy_temp_path   /var/cache/proxxy/tmp;
 
-  {%- for name, params in config['backends'].iteritems() %}
-  proxy_cache_path  /var/cache/proxxy/{{ name }} levels=1:2 keys_zone={{ name }}:8m max_size={{ params['size'] }} inactive={{ params['ttl'] }};
-  {%- endfor %}
-
   server {
     listen 80;
+    server_name _;
 
     location / {
       return 404;
     }
+  }
 
-    {% for name, params in config['backends'].iteritems() %}
-    location /{{ name }} {
+  {% for name, params in config['backends'].iteritems() %}
+  proxy_cache_path  /var/cache/proxxy/{{ name }} levels=1:2 keys_zone={{ name }}:8m max_size={{ params['size'] }} inactive={{ params['ttl'] }};
+
+  server {
+    listen 80;
+    server_name {{ name }};
+
+    location / {
+      add_header X-Proxxy $upstream_cache_status;
       proxy_pass {{ params['path'] }};
       proxy_cache {{ name }};
       proxy_cache_valid {{ params['ttl'] }};
     }
-    {% endfor %}
   }
+  {% endfor %}
 }
