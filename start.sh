@@ -8,4 +8,4 @@ echo "Starting nginx..."
 nginx -c /proxxy/nginx.conf
 
 echo "Tailing logs..."
-tail -F /var/log/proxxy.log
+tail -F /var/log/proxxy/*.log

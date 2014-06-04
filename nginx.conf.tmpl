@@ -14,8 +14,8 @@ http {
   include /etc/nginx/mime.types;
   default_type application/octet-stream;
 
-  access_log /var/log/proxxy.log;
-  error_log  /var/log/proxxy.log;
+  access_log /var/log/proxxy/access.log;
+  error_log  /var/log/proxxy/error.log;
 
   proxy_temp_path   /var/cache/proxxy/tmp;
 

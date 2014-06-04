@@ -5,7 +5,7 @@ RUN apt-get install -y python-dev python-pip python-software-properties
 RUN add-apt-repository -y ppa:nginx/stable
 RUN apt-get update
 RUN apt-get install -y nginx
-RUN mkdir -p /var/cache/proxxy
+RUN mkdir -p /var/cache/proxxy /var/log/proxxy
 
 ADD . /proxxy
 WORKDIR /proxxy
