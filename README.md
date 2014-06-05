@@ -5,7 +5,7 @@ proxxy
 Usage
 -----
 
-1. Copy `config.example.json` to `config.json` and modify it as needed.
+1. Modify `config.json` as needed.
 If you're not using DNS, add proxy hosts to `/etc/hosts`.
 
 2. Build a Docker image and give it some name, e.g. `laggyluke/proxxy`:
