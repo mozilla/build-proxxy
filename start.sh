@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+set -e
+
 if [ ! -f nginx.conf ]; then
   echo "ERROR: nginx.conf not found"
   exit 1

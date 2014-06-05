@@ -8,5 +8,11 @@
       "ContainerPort": "80"
     }
   ],
+  "Volumes": [
+    {
+      "HostDirectory": "/var/log/proxxy",
+      "ContainerDirectory": "/var/log/proxxy"
+    }
+  ],
   "Logging": "/var/log/proxxy"
 }
