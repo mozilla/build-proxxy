@@ -29,6 +29,10 @@ http {
     server_name _;
 
     location / {
+      return 404;
+    }
+
+    location /heartbeat {
       default_type text/plain;
       return 200 "200 OK";
     }
