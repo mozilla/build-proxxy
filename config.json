@@ -10,6 +10,16 @@
       "size": "16g",
       "ttl": "1d"
     },
+    "pvtbuilds.proxxy-us-east-1-dev.srv.releng.use1.mozilla.com": {
+      "path": "https://pvtbuilds.pvt.build.mozilla.org/",
+      "size": "16g",
+      "ttl": "1d"
+    },
+    "pvtbuilds.proxxy-us-east-1-dev.srv.releng.usw2.mozilla.com": {
+      "path": "https://pvtbuilds.pvt.build.mozilla.org/",
+      "size": "16g",
+      "ttl": "1d"
+    },
     "people.mozilla.org.proxxy-us-east-1-dev.srv.releng.use1.mozilla.com": {
       "path": "https://people.mozilla.org/",
       "size": "1g",
