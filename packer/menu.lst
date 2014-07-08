@@ -1,0 +1,8 @@
+default         0
+timeout         0
+hiddenmenu
+
+title           Ubuntu 12.04.4 LTS, kernel 3.2.0-64-virtual
+root            (hd0)
+kernel          /boot/vmlinuz-3.2.0-64-virtual root=LABEL=cloudimg-rootfs ro console=ttyS0
+initrd          /boot/initrd.img-3.2.0-64-virtual

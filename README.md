@@ -1,79 +1,39 @@
 proxxy
 ======
 
+Directories
+-----------
+
+* `app` - the app code itself
+* `eb` - [Elastic Beanstalk](http://aws.amazon.com/elasticbeanstalk/) files
+* `packer` - [Packer](http://www.packer.io/) files
+
+
+Requirements
+------------
+
+If you want to build an AMI using Packer, you'll need the following environment variables set on the **host** machine:
+
+* `AWS_ACCESS_KEY`
+* `AWS_SECRET_KEY`
+* `EC2_CERT` - path to EC2 certificate
+* `EC2_PRIVATE_KEY` - path to EC2 private key
+
+[About AWS Security Credentials](http://docs.aws.amazon.com/AWSSecurityCredentials/1.0/AboutAWSCredentials.html).
+
+These variables and files will be transferred into VM during provisioning.
+
 
 Usage
 -----
 
-1. Modify `config.json` as needed.
-If you're not using DNS, add proxy hosts to `/etc/hosts`.
+    vagrant up
+    vagrant ssh
+    cd /vagrant
 
-2. Build a Docker image and give it some name, e.g. `laggyluke/proxxy`:
+Then:
 
-        docker build -t laggyluke/proxxy .
-
-3. Run a Docker container based on that image:
-
-        docker run --name proxxy -d -p 80:80 laggyluke/proxxy
-
-4. Make few requests via proxxy, notice `X-Proxxy` header:
-
-        $ curl -i http://ftp.mozilla.org.proxy/
-        HTTP/1.1 200 OK
-        Server: nginx/1.6.0
-        Date: Wed, 04 Jun 2014 07:21:12 GMT
-        Content-Type: text/html; charset=UTF-8
-        Content-Length: 384
-        Connection: keep-alive
-        X-Backend-Server: ftp4.dmz.scl3.mozilla.com
-        Cache-Control: max-age=300
-        Expires: Wed, 04 Jun 2014 07:22:11 GMT
-        Access-Control-Allow-Origin: *
-        ETag: "4aac806-180-4f7d4142ca525"
-        Last-Modified: Fri, 25 Apr 2014 01:42:30 GMT
-        X-Cache-Info: cached
-        X-Proxxy: MISS
-        Accept-Ranges: bytes
-
-        <html>
-        <head>
-        <title>ftp.mozilla.org / archive.mozilla.org / releases.mozilla.org</title>
-        </head>
-        <body>
-        <p>ftp.mozilla.org / archive.mozilla.org :: files are <a href="http://ftp.mozilla.org/pub/">here</a>.</p>
-        <p>releases.mozilla.org sends you to the CDN (origin is still ftp.mo), which will result in faster downloads, so use releases.mozilla.org when possible.</p>
-        </body>
-        </html>
-
-        $ curl -i http://ftp.mozilla.org.proxy/
-        HTTP/1.1 200 OK
-        Server: nginx/1.6.0
-        Date: Wed, 04 Jun 2014 07:21:15 GMT
-        Content-Type: text/html; charset=UTF-8
-        Content-Length: 384
-        Connection: keep-alive
-        X-Backend-Server: ftp4.dmz.scl3.mozilla.com
-        Cache-Control: max-age=300
-        Expires: Wed, 04 Jun 2014 07:22:11 GMT
-        Access-Control-Allow-Origin: *
-        ETag: "4aac806-180-4f7d4142ca525"
-        Last-Modified: Fri, 25 Apr 2014 01:42:30 GMT
-        X-Cache-Info: cached
-        X-Proxxy: HIT
-        Accept-Ranges: bytes
-
-        <html>
-        <head>
-        <title>ftp.mozilla.org / archive.mozilla.org / releases.mozilla.org</title>
-        </head>
-        <body>
-        <p>ftp.mozilla.org / archive.mozilla.org :: files are <a href="http://ftp.mozilla.org/pub/">here</a>.</p>
-        <p>releases.mozilla.org sends you to the CDN (origin is still ftp.mo), which will result in faster downloads, so use releases.mozilla.org when possible.</p>
-        </body>
-        </html>
-
-    Please disregard `X-Cache-Info` header as it is provided by upstream server.
-
-5. See the logs:
-
-        docker logs proxxy
+* `make docker-build` - build a Docker container
+* `make docker-run` - run Docker image from container
+* `make docker-push` - publish Duilt docker container to public registry
+* `make packer-build` - build an AWS AMI using Packer

@@ -7,12 +7,14 @@ RUN apt-get update
 RUN apt-get install -y nginx
 RUN mkdir -p /var/cache/proxxy /var/log/proxxy
 
-ADD . /proxxy
+RUN mkdir /proxxy
 WORKDIR /proxxy
-VOLUME ["/var/cache/proxxy", "/var/log/proxxy"]
-
+ADD app/requirements.txt /proxxy/requirements.txt
 RUN pip install -r requirements.txt
+ADD app /proxxy
 RUN ./render.py > /proxxy/nginx.conf
+
+VOLUME ["/var/cache/proxxy", "/var/log/proxxy"]
 
 CMD ["./start.sh"]
 

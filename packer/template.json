@@ -1,0 +1,48 @@
+{
+  "variables": {
+    "s3_bucket": "",
+    "aws_account_id": "",
+    "aws_access_key": "{{env `AWS_ACCESS_KEY`}}",
+    "aws_secret_key": "{{env `AWS_SECRET_KEY`}}",
+    "x509_cert_path": "{{env `EC2_CERT`}}",
+    "x509_key_path": "{{env `EC2_PRIVATE_KEY`}}"
+  },
+  "builders": [{
+    "type": "amazon-instance",
+    "access_key": "{{user `aws_access_key`}}",
+    "secret_key": "{{user `aws_secret_key`}}",
+    "account_id": "{{user `aws_account_id`}}",
+    "ami_name": "proxxy {{timestamp}}",
+    "region": "us-east-1",
+    "source_ami": "ami-7a916212",
+    "instance_type": "m3.large",
+    "ami_virtualization_type": "hvm",
+    "ami_block_device_mappings": [],
+    "ssh_username": "ubuntu",
+    "s3_bucket": "{{user `s3_bucket`}}",
+    "x509_cert_path": "{{user `x509_cert_path`}}",
+    "x509_key_path": "{{user `x509_key_path`}}",
+    "ami_groups": ["all"]
+  }],
+  "provisioners": [
+    {
+      "type": "file",
+      "source": "menu.lst",
+      "destination": "/tmp/menu.lst"
+    },
+    {
+      "type": "file",
+      "source": "upstart.conf",
+      "destination": "/tmp/upstart.conf"
+    },
+    {
+      "type": "shell",
+      "scripts": [
+        "amitools.sh",
+        "docker.sh",
+        "proxxy.sh"
+      ],
+      "execute_command": "{{ .Vars }} sudo -E sh '{{ .Path }}'"
+    }
+  ]
+}
