@@ -33,7 +33,7 @@ Usage
 
 Then:
 
-* `make docker-build` - build a Docker container
-* `make docker-run` - run Docker image from container
-* `make docker-push` - publish Duilt docker container to public registry
+* `make docker-build` - build a Docker image
+* `make docker-run` - run a Docker container from an image
+* `make docker-push` - publish a previously built Docker image to the public registry
 * `make packer-build` - build an AWS AMI using Packer
