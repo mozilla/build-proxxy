@@ -51,6 +51,10 @@ http {
       proxy_pass {{ params['path'] }};
       proxy_cache {{ name }};
       proxy_cache_valid {{ params['ttl'] }};
+      {% if 'username' in params and 'password' in params -%}
+        proxy_set_header Authorization "Basic {{ (params['username'] + ':' + params['password']) | b64encode }}";
+        proxy_hide_header WWW-Authenticate;
+      {%- endif %}
     }
   }
   {% endfor %}

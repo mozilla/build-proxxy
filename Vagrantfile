@@ -7,6 +7,7 @@ VAGRANTFILE_API_VERSION = "2"
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = "ubuntu/trusty64"
   config.vm.hostname = "proxxy.dev"
+  config.vm.network "private_network", ip: "10.0.31.2"
 
   config.vm.provision "docker"
   config.vm.provision "shell", inline: <<-SCRIPT

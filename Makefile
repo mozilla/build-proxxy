@@ -8,9 +8,6 @@ docker-build:
 docker-run:
 	docker run --tty --interactive --rm --publish 80:80 $(DOCKER_NAME)
 
-docker-push:
-	docker push $(DOCKER_NAME)
-
 packer-build:
 	cd packer; packer build \
 		-var 's3_bucket=$(PACKER_S3_BUCKET)' \
