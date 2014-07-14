@@ -1,0 +1,3 @@
+packer:
+  zip_url: https://dl.bintray.com/mitchellh/packer/0.6.0_linux_amd64.zip
+  zip_sha256: 3c3c2d5fff21e0ba9aa25a18fcdf8ec04fbbd2f7364c74d843124336d1d7b36c

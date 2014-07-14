@@ -8,46 +8,17 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = "ubuntu/trusty64"
   config.vm.hostname = "proxxy.dev"
   config.vm.network "private_network", ip: "10.0.31.2"
+  config.vm.synced_folder ".", "/opt/proxxy", :nfs => true
 
-  config.vm.provision "docker"
-  config.vm.provision "shell", inline: <<-SCRIPT
-    export DEBIAN_FRONTEND=noninteractive
-    apt-get update -qq
-    apt-get install -y unzip
-    cd /tmp
-    wget -q https://dl.bintray.com/mitchellh/packer/0.6.0_linux_amd64.zip
-    unzip -d /usr/local/bin 0.6.0_linux_amd64.zip
-  SCRIPT
+  config.vm.provision :ansible do |ansible|
+    ansible.playbook = "ansible/proxxy.yml"
+    ansible.limit = "all"
 
-  config.vm.provision "shell", inline: <<-SCRIPT
-    echo "" > /etc/profile.d/aws.sh
-  SCRIPT
-
-  # copy AWS_ACCESS_KEY and AWS_SECRET_KEY from host to guest
-  if ENV.key?('AWS_ACCESS_KEY') and ENV.key?('AWS_SECRET_KEY')
-    config.vm.provision "shell", inline: <<-SCRIPT
-      echo 'export AWS_ACCESS_KEY="#{ENV['AWS_ACCESS_KEY']}"' >> /etc/profile.d/aws.sh
-      echo 'export AWS_SECRET_KEY="#{ENV['AWS_SECRET_KEY']}"' >> /etc/profile.d/aws.sh
-    SCRIPT
-  end
-
-  # copy EC2_CERT and EC2_PRIVATE_KEY from host to guest
-  if ENV.key?('EC2_CERT') and ENV.key?('EC2_PRIVATE_KEY')
-    config.vm.provision "shell",
-      inline: "mkdir -p ~/.ec2",
-      privileged: false
-
-    config.vm.provision "file",
-      source: ENV['EC2_CERT'],
-      destination: "~/.ec2/cert.pem"
-
-    config.vm.provision "file",
-      source: ENV['EC2_PRIVATE_KEY'],
-      destination: "~/.ec2/pk.pem"
-
-    config.vm.provision "shell", inline: <<-SCRIPT
-      echo 'export EC2_CERT="/home/vagrant/.ec2/cert.pem"' >> /etc/profile.d/aws.sh
-      echo 'export EC2_PRIVATE_KEY="/home/vagrant/.ec2/pk.pem"' >> /etc/profile.d/aws.sh
-    SCRIPT
+    if ENV.has_key?("SECRETS")
+      ansible.inventory_path = "ansible/vagrant-secrets"
+      ansible.ask_vault_pass = true
+    else
+      ansible.inventory_path = "ansible/vagrant"
+    end
   end
 end

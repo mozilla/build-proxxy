@@ -1,0 +1,54 @@
+- name: create directory
+  sudo: true
+  file: >
+    path={{ proxxy.dir }}
+    state=directory
+    recurse=true
+    owner={{ ansible_ssh_user }}
+    group={{ ansible_ssh_user }}
+  when: not proxxy.skip_git_clone
+
+- name: clone repository
+  git: >
+    repo={{ proxxy.repo }}
+    dest={{ proxxy.dir }}
+    version={{ proxxy.version }}
+  notify:
+    - rebuild proxxy
+  when: not proxxy.skip_git_clone
+
+- name: generate app/config.json
+  copy: >
+    content='{{ proxxy.config | to_nice_json }}'
+    dest="{{ proxxy.dir }}/app/config.json"
+    mode=0644
+
+- name: create ~/.ec2 directory
+  file: >
+    path=~/.ec2
+    state=directory
+
+- name: copy EC2 certificate
+  copy: >
+    content='{{ proxxy.packer.ec2_ceriticate }}'
+    dest=~/.ec2/cert.pem
+    mode=0644
+
+- name: copy EC2 private key
+  copy: >
+    content='{{ proxxy.packer.ec2_private_key }}'
+    dest=~/.ec2/pk.pem
+    mode=0600
+
+- name: generate .envrc
+  template: >
+    src=envrc.j2
+    dest="{{ proxxy.dir }}/.envrc"
+    mode=0644
+
+- name: allow .envrc
+  command: >
+    /usr/local/bin/direnv allow
+    chdir={{ proxxy.dir }}
+  register: result
+  changed_when: result.rc != 0

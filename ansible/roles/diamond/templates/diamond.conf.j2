@@ -1,0 +1,20 @@
+[server]
+
+handlers = diamond.handler.hostedgraphite.HostedGraphiteHandler, diamond.handler.archive.ArchiveHandler
+
+
+[handlers]
+
+[[ArchiveHandler]]
+
+# File to write archive log files
+log_file = /var/log/diamond/archive.log
+
+# Number of days to keep archive log files
+days = 7
+
+
+[[HostedGraphiteHandler]]
+apikey = {{ diamond.hostedgraphite_api_key }}
+timeout = 15
+batch = 1

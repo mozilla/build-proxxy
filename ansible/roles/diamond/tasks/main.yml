@@ -1,0 +1,46 @@
+- name: install packages
+  sudo: true
+  apt: pkg={{ item }} state=latest
+  with_items:
+    - make
+    - pbuilder
+    - python-mock
+    - python-configobj
+    - python-support
+    - cdbs
+
+- name: create directory
+  sudo: true
+  file: >
+    path=/opt/diamond
+    state=directory
+    recurse=true
+    owner={{ ansible_ssh_user }}
+    group={{ ansible_ssh_user }}
+
+- name: clone repository
+  git: >
+    repo={{ diamond.repo }}
+    version={{ diamond.tag }}
+    dest=/opt/diamond
+
+- name: create deb
+  command: >
+    make builddeb
+    chdir=/opt/diamond
+    creates=/opt/diamond/build/diamond_{{ diamond.version }}_all.deb
+
+- name: install deb
+  sudo: true
+  apt: deb=/opt/diamond/build/diamond_{{ diamond.version }}_all.deb
+  notify: restart graphite
+
+- name: generate config
+  sudo: true
+  template: >
+    src=diamond.conf.j2
+    dest=/etc/diamond/diamond.conf
+    owner=root
+    group=root
+    mode=0600
+  notify: restart diamond

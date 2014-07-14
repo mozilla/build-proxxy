@@ -1,2 +1,3 @@
 /.vagrant
+/.envrc
 /app/config.json

@@ -1,0 +1,10 @@
+- hosts: proxxy
+  roles:
+    - common
+    - laggyluke.hostname
+    - laggyluke.inventory-hosts
+    - laggyluke.direnv
+    - docker
+    - packer
+    - diamond
+    - proxxy
