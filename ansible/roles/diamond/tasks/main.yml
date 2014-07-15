@@ -33,14 +33,14 @@
 - name: install deb
   sudo: true
   apt: deb=/opt/diamond/build/diamond_{{ diamond.version }}_all.deb
-  notify: restart graphite
+  notify: restart diamond
 
 - name: generate config
   sudo: true
   template: >
     src=diamond.conf.j2
     dest=/etc/diamond/diamond.conf
-    owner=root
+    owner=diamond
     group=root
     mode=0600
   notify: restart diamond
