@@ -21,7 +21,13 @@
   copy: >
     content='{{ proxxy.config | to_nice_json }}'
     dest="{{ proxxy.dir }}/app/config.json"
-    mode=0644
+    mode=0600
+
+- name: generate packer/diamond.conf
+  template: >
+    src=diamond.conf.j2
+    dest="{{ proxxy.dir }}/packer/diamond.conf"
+    mode=0600
 
 - name: create ~/.ec2 directory
   file: >

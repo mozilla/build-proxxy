@@ -1,3 +1,4 @@
 /.vagrant
 /.envrc
 /app/config.json
+/packer/diamond.conf

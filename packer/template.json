@@ -44,6 +44,11 @@
       "destination": "/tmp/packer/config.json"
     },
     {
+      "type": "file",
+      "source": "diamond.conf",
+      "destination": "/tmp/packer/diamond.conf"
+    },
+    {
       "type": "shell",
       "inline": "mv /tmp/packer /opt/packer",
       "execute_command": "{{ .Vars }} sudo -E bash '{{ .Path }}'"
@@ -53,6 +58,7 @@
       "scripts": [
         "amitools.sh",
         "docker.sh",
+        "diamond.sh",
         "proxxy.sh"
       ],
       "execute_command": "{{ .Vars }} sudo -E bash '{{ .Path }}'"

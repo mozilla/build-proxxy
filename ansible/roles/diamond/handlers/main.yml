@@ -1,3 +1,0 @@
-- name: restart diamond
-  sudo: true
-  service: name=diamond state=restarted

@@ -114,7 +114,7 @@ apikey = abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz01
 
 [[HostedGraphiteHandler]]
 host = carbon.hostedgraphite.com
-apikey = {{ diamond.hostedgraphite_api_key }}
+apikey = {{ proxxy.packer.hostedgraphite_api_key }}
 timeout = 15
 batch = 1
 
@@ -209,4 +209,3 @@ args = ('/var/log/diamond/diamond.log', 'midnight', 1, 7)
 
 format = [%(asctime)s] [%(threadName)s] %(message)s
 datefmt =
-

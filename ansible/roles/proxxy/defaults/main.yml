@@ -13,3 +13,4 @@ proxxy:
     ec2_ceriticate: ~
     ec2_private_key: ~
     s3_bucket: mozilla-releng-amis/proxxy
+    hostedgraphite_api_key: ~

@@ -1,5 +1,0 @@
-diamond:
-  repo: https://github.com/BrightcoveOS/Diamond.git
-  tag: v3.4
-  version: 3.4.0
-  hostedgraphite_api_key: ~

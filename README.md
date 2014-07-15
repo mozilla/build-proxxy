@@ -55,3 +55,6 @@ Then:
     $ make packer-build
 
 You should see an AMI ID when the build is complete.
+
+Packer build can sometimes freeze; you can hit `^C` and wait for Packer to
+clean up temporary EC2 keypair and security group, then try again.
