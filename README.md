@@ -5,6 +5,7 @@ Directories
 -----------
 
 * `app` - the app code itself
+* `ansible` - [Ansible](http://docs.ansible.com/) files
 * `packer` - [Packer](http://www.packer.io/) files
 
 
@@ -15,19 +16,23 @@ Requirements
 * [Vagrant 1.6+](http://www.vagrantup.com/)
 
 
-Development
------------
+Development / testing
+---------------------
 
 The main config is at `ansible/group_vars/vagrant`.
+
+First, add the following line to `/etc/hosts`:
+
+    10.0.31.2   proxxy.dev
+
+Then:
 
     $ vagrant up
     $ vagrant ssh
     $ cd /opt/proxxy
+    $ make docker-build     # build a Docker image
+    $ make docker-run       # run a Docker container from an image
 
-Then:
-
-* `make docker-build` - build a Docker image
-* `make docker-run` - run a Docker container from an image
 
 Building an AMI
 ---------------
@@ -35,7 +40,11 @@ Building an AMI
 The main config is at `ansible/group_vars/vagrant-secrets`, encrypted using
 [Ansible Vault](http://docs.ansible.com/playbooks_vault.html).
 
-First, provision a fresh VM with secrets (will ask for vault password):
+View / edit secrets in $EDITOR:
+
+    $ ansible-vault edit ansible/group_vars/vagrant-secrets
+
+Provision a fresh VM with secrets (will ask for vault password):
 
     $ SECRETS=1 vagrant up
 
