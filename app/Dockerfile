@@ -9,10 +9,10 @@ RUN mkdir -p /var/cache/proxxy /var/log/proxxy
 
 RUN mkdir /proxxy
 WORKDIR /proxxy
-ADD app/requirements.txt /proxxy/requirements.txt
+ADD ./requirements.txt /proxxy/requirements.txt
 RUN pip install -r requirements.txt
-ADD app /proxxy
-RUN ./render.py > /proxxy/nginx.conf
+ADD . /proxxy
+RUN python render.py > /proxxy/nginx.conf
 
 VOLUME ["/var/cache/proxxy", "/var/log/proxxy"]
 
