@@ -1,6 +1,6 @@
 {
   "variables": {
-    "s3_bucket": "{{env `S3_BUCKET`}}",
+    "s3_prefix": "{{env `S3_PREFIX`}}",
     "aws_account_id": "{{env `AWS_ACCOUNT_ID`}}",
     "aws_access_key": "{{env `AWS_ACCESS_KEY`}}",
     "aws_secret_key": "{{env `AWS_SECRET_KEY`}}",
@@ -14,14 +14,14 @@
     "access_key": "{{user `aws_access_key`}}",
     "secret_key": "{{user `aws_secret_key`}}",
     "account_id": "{{user `aws_account_id`}}",
-    "ami_name": "proxxy {{timestamp}}",
+    "ami_name": "proxxy use1 {{timestamp}}",
     "region": "us-east-1",
     "source_ami": "ami-7a916212",
     "instance_type": "{{user `instance_type`}}",
     "ami_virtualization_type": "hvm",
     "ami_block_device_mappings": [],
     "ssh_username": "ubuntu",
-    "s3_bucket": "{{user `s3_bucket`}}",
+    "s3_bucket": "{{user `s3_prefix`}}-use1/proxxy",
     "x509_cert_path": "{{user `x509_cert_path`}}",
     "x509_key_path": "{{user `x509_key_path`}}"
   },{
@@ -30,14 +30,14 @@
     "access_key": "{{user `aws_access_key`}}",
     "secret_key": "{{user `aws_secret_key`}}",
     "account_id": "{{user `aws_account_id`}}",
-    "ami_name": "proxxy {{timestamp}}",
+    "ami_name": "proxxy usw2 {{timestamp}}",
     "region": "us-west-2",
     "source_ami": "ami-3fcab50f",
     "instance_type": "{{user `instance_type`}}",
     "ami_virtualization_type": "hvm",
     "ami_block_device_mappings": [],
     "ssh_username": "ubuntu",
-    "s3_bucket": "{{user `s3_bucket`}}",
+    "s3_bucket": "{{user `s3_prefix`}}-usw2/proxxy",
     "x509_cert_path": "{{user `x509_cert_path`}}",
     "x509_key_path": "{{user `x509_key_path`}}"
   }],

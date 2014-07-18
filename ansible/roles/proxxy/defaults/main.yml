@@ -12,5 +12,5 @@ proxxy:
     aws_secret_key: ~
     ec2_ceriticate: ~
     ec2_private_key: ~
-    s3_bucket: mozilla-releng-amis/proxxy
+    s3_prefix: mozilla-releng-amis-packer
     hostedgraphite_api_key: ~
