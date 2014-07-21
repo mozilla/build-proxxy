@@ -13,3 +13,8 @@ rm -rf /tmp/ec2-ami-tools
 mv /opt/packer/menu.lst /boot/grub/menu.lst
 chown root:root /boot/grub/menu.lst
 chmod 644 /boot/grub/menu.lst
+
+export KERNEL_RELEASE=`uname -r`
+export KERNEL_LINE=`cat /proc/cmdline | sed 's/[^ ]* //'`
+sed -i.bak "s/%KERNEL_RELEASE%/${KERNEL_RELEASE}/" /boot/grub/menu.lst
+sed -i.bak "s/%KERNEL_LINE%/${KERNEL_LINE}/" /boot/grub/menu.lst
