@@ -39,7 +39,7 @@ http {
     }
   }
 
-  {% for name, params in config['backends'].iteritems() %}
+  {% for name, params in proxxy.config.backends.iteritems() %}
   proxy_cache_path  /var/cache/proxxy/{{ name }} levels=1:2 keys_zone={{ name }}:8m max_size={{ params['size'] }} inactive={{ params['ttl'] }};
 
   server {

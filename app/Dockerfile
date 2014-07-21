@@ -1,18 +1,14 @@
-FROM ubuntu:12.04
+FROM ubuntu:14.04
 ENV DEBIAN_FRONTEND noninteractive
-RUN apt-get update
-RUN apt-get install -y python-dev python-pip python-software-properties
-RUN add-apt-repository -y ppa:nginx/stable
+
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys C300EE8C
+ADD ./sources.list /etc/apt/sources.list.d/nginx.list
 RUN apt-get update
 RUN apt-get install -y nginx
-RUN mkdir -p /var/cache/proxxy /var/log/proxxy
 
-RUN mkdir /proxxy
-WORKDIR /proxxy
-ADD ./requirements.txt /proxxy/requirements.txt
-RUN pip install -r requirements.txt
+RUN mkdir -p /var/cache/proxxy /var/log/proxxy
 ADD . /proxxy
-RUN python render.py > /proxxy/nginx.conf
+WORKDIR /proxxy
 
 VOLUME ["/var/cache/proxxy", "/var/log/proxxy"]
 

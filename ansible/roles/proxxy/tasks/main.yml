@@ -17,10 +17,10 @@
     - rebuild proxxy
   when: not proxxy.skip_git_clone
 
-- name: generate app/config.json
-  copy: >
-    content='{{ proxxy.config | to_nice_json }}'
-    dest="{{ proxxy.dir }}/app/config.json"
+- name: generate app/nginx.conf
+  template: >
+    src=nginx.conf.j2
+    dest="{{ proxxy.dir }}/app/nginx.conf"
     mode=0600
 
 - name: generate packer/diamond.conf

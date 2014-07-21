@@ -6,3 +6,9 @@ docker-run:
 
 packer-build:
 	cd packer; packer build template.json
+
+packer-build-use1:
+	cd packer; packer build -only proxxy-use1 template.json
+
+packer-build-usw2:
+	cd packer; packer build -only proxxy-usw2 template.json

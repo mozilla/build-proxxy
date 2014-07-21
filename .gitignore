@@ -1,4 +1,4 @@
 /.vagrant
 /.envrc
-/app/config.json
+/app/nginx.conf
 /packer/diamond.conf
