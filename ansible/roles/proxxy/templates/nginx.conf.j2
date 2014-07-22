@@ -16,7 +16,9 @@ http {
   include /etc/nginx/mime.types;
   default_type application/octet-stream;
 
-  log_format proxxy '$remote_addr - $upstream_cache_status - $host [$time_local]  '
+  log_format proxxy '$remote_addr - $upstream_cache_status - '
+                    '[$upstream_response_time / $request_time] '
+                    '$host [$time_local]  '
                     '"$request" $status $body_bytes_sent '
                     '"$http_referer" "$http_user_agent"';
 
