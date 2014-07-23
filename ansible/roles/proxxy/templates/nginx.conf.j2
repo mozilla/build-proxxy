@@ -26,6 +26,7 @@ http {
   error_log  /var/log/proxxy/error.log;
 
   proxy_temp_path   /var/cache/proxxy/tmp;
+  proxy_ignore_headers  Expires Cache-Control Set-Cookie;
 
   server {
     listen 80;
@@ -52,7 +53,6 @@ http {
       add_header X-Proxxy $upstream_cache_status;
       proxy_pass {{ params['path'] }};
       proxy_cache {{ name }};
-      proxy_cache_valid {{ params['ttl'] }};
       {% if 'username' in params and 'password' in params -%}
         proxy_set_header Authorization "Basic {{ (params['username'] + ':' + params['password']) | b64encode }}";
         proxy_hide_header WWW-Authenticate;
