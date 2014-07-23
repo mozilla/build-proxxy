@@ -1,4 +1,5 @@
 /.vagrant
+/.vaultpass
 /.envrc
 /app/nginx.conf
 /packer/diamond.conf

@@ -13,12 +13,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.provision :ansible do |ansible|
     ansible.playbook = "ansible/proxxy.yml"
     ansible.limit = "all"
+    ansible.vault_password_file = ".vaultpass"
 
-    if ENV.has_key?("SECRETS")
-      ansible.inventory_path = "ansible/vagrant-secrets"
-      ansible.ask_vault_pass = true
-    else
-      ansible.inventory_path = "ansible/vagrant"
-    end
+    ansible.groups = {
+      "proxxy" => ["default"],
+      "vagrant:children" => ["proxxy"]
+    }
   end
 end

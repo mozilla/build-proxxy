@@ -14,18 +14,11 @@ Requirements
 
 * [Ansible 1.6+](http://docs.ansible.com/)
 * [Vagrant 1.6+](http://www.vagrantup.com/)
+* Ansible Vault password in `.vaultpass` file
 
 
 Development / testing
 ---------------------
-
-The main config is at `ansible/group_vars/vagrant`.
-
-First, add the following line to `/etc/hosts`:
-
-    10.0.31.2   proxxy.dev
-
-Then:
 
     $ vagrant up
     $ vagrant ssh
@@ -37,24 +30,21 @@ Then:
 Building an AMI
 ---------------
 
-The main config is at `ansible/group_vars/vagrant-secrets`, encrypted using
+The main config is at `ansible/group_vars/vagrant`, encrypted using
 [Ansible Vault](http://docs.ansible.com/playbooks_vault.html).
 
 View / edit secrets in $EDITOR:
 
-    $ ansible-vault edit ansible/group_vars/vagrant-secrets
-
-Provision a fresh VM with secrets (will ask for vault password):
-
-    $ SECRETS=1 vagrant up
+    $ ansible-vault edit --vault-password-file=.vaultpass ansible/group_vars/vagrant
 
 Then:
 
+    $ vagrant provision
     $ vagrant ssh
     $ cd /opt/proxxy
     $ make packer-build
 
-You should see an AMI ID when the build is complete.
+You should see AMI IDs when the build is complete.
 
 Packer build can sometimes freeze; you can hit `^C` and wait for Packer to
 clean up temporary EC2 keypair and security group, then try again.
