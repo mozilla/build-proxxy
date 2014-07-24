@@ -1,3 +1,17 @@
+- name: install Python
+  sudo: true
+  apt: pkg={{ item }}
+  with_items:
+    - python
+    - python-pip
+
+- name: install Python packages
+  sudo: true
+  pip: name={{ item }}
+  with_items:
+    - invoke
+    - boto
+
 - name: create directory
   sudo: true
   file: >
