@@ -11,5 +11,7 @@ apt-get install -y lxc-docker
 echo 'DOCKER_OPTS="-r=false"' > /etc/default/docker
 cp /opt/packer/upstart.conf /etc/init/proxxy.conf
 
+adduser ubuntu docker
+
 reboot
 sleep 60
