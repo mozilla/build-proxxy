@@ -1,6 +1,7 @@
 import os
 import time
 import copy
+import xml.etree.ElementTree as ET
 
 if 'AWS_ACCESS_KEY' in os.environ:
     os.environ['AWS_ACCESS_KEY_ID'] = os.environ['AWS_ACCESS_KEY']
@@ -14,6 +15,41 @@ import boto
 import boto.ec2.autoscale
 
 # boto.set_stream_logger('boto')
+
+@task
+def list_images(region='us-east-1'):
+    ec2 = boto.ec2.connect_to_region(region)
+    filters = {
+        'name': '*proxxy*'
+    }
+    images = ec2.get_all_images(filters=filters)
+    images = sorted(images, key=lambda image: image.name)
+    for image in images:
+        print "%s: %s" % (image.id, image.name)
+
+
+@task
+def destroy_image(ami, region='us-east-1'):
+    ec2 = boto.ec2.connect_to_region(region)
+
+    print "Getting AMI metadata"
+    image = ec2.get_image(ami)
+    if image is None:
+        print "Image not found: %s" % ami
+        return
+
+    if image.root_device_type == 'instance-store':
+        print "Deleting AMI bundle: %s" % image.location
+        multi_delete_result = delete_bundle(image.location)
+        print "Bundle deleted: %s" % vars(multi_delete_result)
+
+        print "Deregistering AMI"
+        image.deregister()
+    else:
+        print "Unsupported root device type: %s" % image.root_device_type
+        return
+
+    print "Done"
 
 @task
 def launch_instance(ami, region='us-east-1'):
@@ -130,3 +166,31 @@ def wait_for_healthy_instances(autoscale, asg_name, min_count = 2):
             asg.update();
         else:
             break
+
+def delete_bundle(manifest_location):
+    s3 = boto.connect_s3()
+
+    bucket_name, manifest_path = manifest_location.split('/', 1)
+    bucket = s3.get_bucket(bucket_name, validate=False)
+    if bucket is None:
+        print "No bucket found: %s" % bucket_name
+        return
+
+    print "Downloading AMI manifest: %s" % manifest_path
+    manifest_key = bucket.get_key(manifest_path)
+    if manifest_key is None:
+        print "WARNING: manifest not found, AMI bundle is probably already delete"
+        return
+
+    parts_prefix = manifest_path.rsplit('/', 1)[0]
+    manifest_raw = manifest_key.get_contents_as_string()
+
+    to_delete = []
+    manifest = ET.fromstring(manifest_raw)
+    for part in manifest.findall('./image/parts/part/filename'):
+        part_path = parts_prefix + '/' + part.text
+        to_delete.append(part_path)
+
+    print "Deleting %d bundle parts" % len(to_delete)
+    to_delete.append(manifest_key.name)
+    return bucket.delete_keys(to_delete)
