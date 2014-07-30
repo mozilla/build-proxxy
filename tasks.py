@@ -17,13 +17,34 @@ import boto.ec2.autoscale
 # boto.set_stream_logger('boto')
 
 @task
+def cleanup_images(region='us-east-1', keep=3):
+    "Destroy old AMIs"
+    ec2 = boto.ec2.connect_to_region(region)
+    images = find_images(ec2)
+    images_to_destroy = images[:-keep]
+
+    if not images_to_destroy:
+        print "No images to destroy"
+        return
+
+    print "Images to destroy:"
+    for image in images_to_destroy:
+        print "%s: %s" % (image.id, image.name)
+
+    try:
+        raw_input("Press Enter to continue or Ctrl-C to abort...\n")
+    except KeyboardInterrupt:
+        return
+
+    for image in images_to_destroy:
+        _destroy_image(image)
+
+    print "Done"
+
+@task
 def list_images(region='us-east-1'):
     ec2 = boto.ec2.connect_to_region(region)
-    filters = {
-        'name': '*proxxy*'
-    }
-    images = ec2.get_all_images(filters=filters)
-    images = sorted(images, key=lambda image: image.name)
+    images = find_images(ec2)
     for image in images:
         print "%s: %s" % (image.id, image.name)
 
@@ -38,16 +59,7 @@ def destroy_image(ami, region='us-east-1'):
         print "Image not found: %s" % ami
         return
 
-    if image.root_device_type == 'instance-store':
-        print "Deleting AMI bundle: %s" % image.location
-        multi_delete_result = delete_bundle(image.location)
-        print "Bundle deleted: %s" % vars(multi_delete_result)
-
-        print "Deregistering AMI"
-        image.deregister()
-    else:
-        print "Unsupported root device type: %s" % image.root_device_type
-        return
+    _destroy_image(image)
 
     print "Done"
 
@@ -119,7 +131,6 @@ def update_asg(ami, name='proxxy', region='us-east-1'):
     # delete old launch configuration
     old_launch_config.delete();
 
-    #print "Result: %s" % result
     print "Done"
 
 @task
@@ -194,3 +205,25 @@ def delete_bundle(manifest_location):
     print "Deleting %d bundle parts" % len(to_delete)
     to_delete.append(manifest_key.name)
     return bucket.delete_keys(to_delete)
+
+def find_images(ec2):
+    filters = {
+        'name': '*proxxy*'
+    }
+    images = ec2.get_all_images(filters=filters)
+    images = sorted(images, key=lambda image: image.name)
+    return images
+
+def _destroy_image(image):
+    print "Destroying image: %s" % image.id
+    if image.root_device_type == 'instance-store':
+        print "Deleting AMI bundle: %s" % image.location
+        multi_delete_result = delete_bundle(image.location)
+        if multi_delete_result.errors:
+            "Bundle deleted, with errors: %s" % vars(multi_delete_result)
+
+        print "Deregistering AMI"
+        image.deregister()
+    else:
+        print "Unsupported root device type: %s" % image.root_device_type
+        return
