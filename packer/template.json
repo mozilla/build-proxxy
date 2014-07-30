@@ -9,12 +9,12 @@
     "instance_type": "m3.xlarge"
   },
   "builders": [{
-    "name": "proxxy-use1",
+    "name": "proxxy-us-east-1",
     "type": "amazon-instance",
     "access_key": "{{user `aws_access_key`}}",
     "secret_key": "{{user `aws_secret_key`}}",
     "account_id": "{{user `aws_account_id`}}",
-    "ami_name": "proxxy use1 {{timestamp}}",
+    "ami_name": "proxxy us-east-1 {{timestamp}}",
     "region": "us-east-1",
     "source_ami": "ami-7a916212",
     "instance_type": "{{user `instance_type`}}",
@@ -25,12 +25,12 @@
     "x509_cert_path": "{{user `x509_cert_path`}}",
     "x509_key_path": "{{user `x509_key_path`}}"
   },{
-    "name": "proxxy-usw2",
+    "name": "proxxy-us-west-2",
     "type": "amazon-instance",
     "access_key": "{{user `aws_access_key`}}",
     "secret_key": "{{user `aws_secret_key`}}",
     "account_id": "{{user `aws_account_id`}}",
-    "ami_name": "proxxy usw2 {{timestamp}}",
+    "ami_name": "proxxy us-west-2 {{timestamp}}",
     "region": "us-west-2",
     "source_ami": "ami-3fcab50f",
     "instance_type": "{{user `instance_type`}}",

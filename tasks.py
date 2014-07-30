@@ -9,7 +9,7 @@ if 'AWS_ACCESS_KEY' in os.environ:
 if 'AWS_SECRET_KEY' in os.environ:
     os.environ['AWS_SECRET_ACCESS_KEY'] = os.environ['AWS_SECRET_KEY']
 
-from invoke import task
+from invoke import task, run
 
 import boto
 import boto.ec2.autoscale
@@ -17,8 +17,33 @@ import boto.ec2.autoscale
 # boto.set_stream_logger('boto')
 
 @task
+def docker_build(tag="proxxy"):
+    """Build Proxxy Docker image"""
+
+    run("docker build --tag {} ./app".format(tag))
+
+@task
+def docker_run(tag="proxxy"):
+    """Run Proxxy Docker container"""
+
+    run("docker run --tty --interactive --rm --publish 80:80 {}".format(tag))
+
+@task
+def packer_build(region=None):
+    """Build Proxxy AMI using Packer"""
+
+    cmd = ["packer build"]
+    if region is not None:
+        cmd.append("-only proxxy-{}".format(region))
+    cmd.append("template.json")
+    cmd = " ".join(cmd)
+
+    os.chdir("packer")
+    run(cmd)
+
+@task
 def cleanup_images(region='us-east-1', keep=3):
-    "Destroy old AMIs"
+    """Clean up (destroy) old Proxxy AMIs"""
     ec2 = boto.ec2.connect_to_region(region)
     images = find_images(ec2)
     images_to_destroy = images[:-keep]
@@ -43,6 +68,7 @@ def cleanup_images(region='us-east-1', keep=3):
 
 @task
 def list_images(region='us-east-1'):
+    """List Proxxy AMIs"""
     ec2 = boto.ec2.connect_to_region(region)
     images = find_images(ec2)
     for image in images:
@@ -51,6 +77,7 @@ def list_images(region='us-east-1'):
 
 @task
 def destroy_image(ami, region='us-east-1'):
+    """Destroy AMI"""
     ec2 = boto.ec2.connect_to_region(region)
 
     print "Getting AMI metadata"
@@ -65,6 +92,8 @@ def destroy_image(ami, region='us-east-1'):
 
 @task
 def launch_instance(ami, region='us-east-1'):
+    """Manually launch Proxxy EC2 instance - useful for testing fresh AMIs"""
+
     ec2 = boto.ec2.connect_to_region(region)
     reservation = ec2.run_instances(
         ami,
@@ -86,12 +115,16 @@ def launch_instance(ami, region='us-east-1'):
 
 @task
 def destroy_instance(instance, region='us-east-1'):
+    """Manually destroy EC2 instance"""
+
     ec2 = boto.ec2.connect_to_region(region)
     result = ec2.terminate_instances(instance_ids=[instance])
     print "Result: %s" % result
 
 @task
 def update_asg(ami, name='proxxy', region='us-east-1'):
+    """Update Proxxy autoscaling group with a fresh AMI"""
+
     if ami is None:
         print "AMI not specified"
         exit(1)
@@ -135,6 +168,8 @@ def update_asg(ami, name='proxxy', region='us-east-1'):
 
 @task
 def rotate_asg(name='proxxy', region='us-east-1', min_healthy_instances=2):
+    """Perform a rolling restart on Proxxy autoscaling group"""
+
     ec2 = boto.ec2.connect_to_region(region)
     autoscale = boto.ec2.autoscale.connect_to_region(region)
 
@@ -211,7 +246,7 @@ def find_images(ec2):
         'name': '*proxxy*'
     }
     images = ec2.get_all_images(filters=filters)
-    images = sorted(images, key=lambda image: image.name)
+    images = sorted(images, key=lambda image: image.name.split()[-1])
     return images
 
 def _destroy_image(image):

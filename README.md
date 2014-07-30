@@ -20,14 +20,14 @@ Requirements
 Development / testing
 ---------------------
 
-    $ vagrant up
-    $ vagrant ssh
-    $ cd /opt/proxxy
-    $ make docker-build     # build a Docker image
-    $ make docker-run       # run a Docker container from an image
+    vagrant up
+    vagrant ssh
+    cd /opt/proxxy
+    inv docker_build  # build a Docker image
+    inv docker_run    # run a Docker container from an image
 
 
-Building a fresh AMI
+Production workflow
 --------------------
 
 The main config is at `ansible/group_vars/vagrant`, encrypted using
@@ -35,65 +35,48 @@ The main config is at `ansible/group_vars/vagrant`, encrypted using
 
 View / edit secrets in $EDITOR:
 
-    $ ansible-vault edit --vault-password-file=.vaultpass ansible/group_vars/vagrant
+    ansible-vault edit --vault-password-file=.vaultpass ansible/group_vars/vagrant
 
 Then:
 
-    $ vagrant provision
-    $ vagrant ssh
-    $ cd /opt/proxxy
-    $ make packer-build
+    vagrant provision
+    vagrant ssh
+    cd /opt/proxxy
 
-You should see AMI IDs when the build is complete.
+Build a fresh AMIs using Packer in all supported regions:
 
-Packer build can sometimes freeze; you can hit `^C` and wait for Packer to
-clean up temporary EC2 keypair and security group, then try again.
+    inv packer_build
 
+Optionally you can build a fresh AMI in a specific region:
 
-Upgrading Production to use a fresh AMI
----------------------------------------
+    in packer_build --region=<region>
 
-    $ vagrant ssh
-    $ cd /opt/proxxy
+**The following steps should be performed for all supported regions (`us-east-1` and `us-west-2`).**
 
-First, do some smoke tests on a fresh AMI:
+You can see the list of Proxxy AMIs:
 
-    $ invoke launch_instance ami-5cb47c34 --region=us-east-1
-    Reservation: Reservation:r-96a599e7
-    Instance: Instance:i-09d19d25
-    Instance state: pending
-    Instance state: pending
-    [...]
-    Instance state: pending
-    Instance state: running
-    You can now SSH into this server with ubuntu@54.237.177.70
+    inv list_images --region=<region>
 
-Don't forget to kill the instance when you're done:
+You should test a freshly built AMI:
 
-    $ invoke destroy_instance i-09d19d25 --region=us-east-1
-    Result: [Instance:i-09d19d25]
+    inv launch_instance <ami-id> --region=<region>
 
-Then, update AutoScalingGroup with the new AMI:
+When done, destroy testing instance:
 
-    $ invoke update_asg ami-5cb47c34 --region=us-east-1
-    Old Launch Configuration: LaunchConfiguration:proxxy-ami-a623eace
-    New Launch Configuration: LaunchConfiguration:proxxy-ami-5cb47c34
-    Done
+    inv destroy_instance <instance-id> --region=<region>
 
-And perform a rolling upgrade of all instances (will take some time):
+Update production autoscaling group's launch configuration with the new AMI:
 
-    $ invoke rotate_asg --region=us-east-1
-    Temporarily increasing desired capacity to 3
-    Instances: [Instance<id:i-5c767376, state:InService, health:Healthy>]
-    Healthy Instances: [Instance<id:i-5c767376, state:InService, health:Healthy>]
-    Need at least 3 instances in service to continue, got 1, waiting...
-    Instances: [Instance<id:i-5c767376, state:InService, health:Healthy>, Instance<id:i-9fe5a9b3, state:Pending, health:Healthy>, Instance<id:i-57dad07c, state:Pending, health:Healthy>]
+    inv update_asg <ami-id> --region=<region>
 
-    [...last 4 lines repeat for couple of mins...]
+Next, perform a rolling restart of all instances in autoscaling group to make use of new AMI launch configuration:
 
-    Terminating instance i-5c767376
+    inv rotate_asg --region=<region>
 
-    [...again, those 4 lines repeat for couple of mins...]
+You can manually destroy old AMIs:
 
-    Decreasing desired capacity back to 1
-    Done
+    inv destroy_image <ami-id> --region=<region>
+
+Or just perform an automatic AMI cleanup - by default this will keep 3 most recent AMIs:
+
+    inv cleanup_images --region=<region>
