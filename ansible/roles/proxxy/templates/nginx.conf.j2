@@ -42,12 +42,12 @@ http {
     }
   }
 
-  {% for name, params in proxxy.config.backends.iteritems() %}
+  {% for name, params in proxxy.config.backends.iteritems() -%}
   proxy_cache_path  /var/cache/proxxy/{{ name }} levels=1:2 keys_zone={{ name }}:8m max_size={{ params['size'] }} inactive={{ params['ttl'] }};
 
   server {
     listen 80;
-    server_name {{ name }};
+    server_name {{ name }}.*;
 
     location / {
       add_header X-Proxxy $upstream_cache_status;
@@ -58,7 +58,10 @@ http {
         proxy_set_header Authorization "Basic {{ (params['username'] + ':' + params['password']) | b64encode }}";
         proxy_hide_header WWW-Authenticate;
       {%- endif %}
+
     }
   }
+
   {% endfor %}
+
 }

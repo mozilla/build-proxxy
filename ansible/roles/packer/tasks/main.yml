@@ -11,5 +11,5 @@
 - name: extract
   sudo: true
   command: >
-    unzip -d /usr/local/bin /opt/packer.zip
+    unzip -o -d /usr/local/bin /opt/packer.zip
     creates=/usr/local/bin/packer
