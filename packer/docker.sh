@@ -9,6 +9,9 @@ apt-get update
 apt-get install -y lxc-docker
 
 echo 'DOCKER_OPTS="-r=false"' > /etc/default/docker
+sudo service docker stop
+sleep 5
+
 cp /opt/packer/upstart.conf /etc/init/proxxy.conf
 
 adduser ubuntu docker
