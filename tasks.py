@@ -13,6 +13,7 @@ from invoke import task, run
 
 import boto
 import boto.ec2.autoscale
+from boto.ec2.blockdevicemapping import BlockDeviceMapping
 
 # boto.set_stream_logger('boto')
 
@@ -130,7 +131,7 @@ def update_asg(ami, name='proxxy', region='us-east-1'):
         exit(1)
 
     ec2 = boto.ec2.connect_to_region(region)
-    autoscale = boto.ec2.autoscale.connect_to_region(region)
+    autoscale = boto.ec2.autoscale.connect_to_region(region, use_block_device_types=True)
 
     # get AMI metadata
     ami = ec2.get_all_images(image_ids=[ami])[0]
@@ -149,11 +150,9 @@ def update_asg(ami, name='proxxy', region='us-east-1'):
     print "Old Launch Configuration: %s" % old_launch_config
 
     # create new launch configuration based on the old one
-    new_launch_config = copy.copy(old_launch_config)
+    new_launch_config = _copy_launch_config(old_launch_config)
     new_launch_config.name = new_launch_config_name
     new_launch_config.image_id = ami.id
-    new_launch_config.instance_monitoring = None
-    new_launch_config.block_device_mappings = None
     autoscale.create_launch_configuration(new_launch_config)
     print "New Launch Configuration: %s" % new_launch_config
 
@@ -262,3 +261,12 @@ def _destroy_image(image):
     else:
         print "Unsupported root device type: %s" % image.root_device_type
         return
+
+
+def _copy_launch_config(src):
+    dst = copy.copy(src)
+
+    if isinstance(dst.block_device_mappings, BlockDeviceMapping):
+        dst.block_device_mappings = [dst.block_device_mappings]
+
+    return dst
