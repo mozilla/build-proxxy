@@ -11,3 +11,4 @@ docker run --name proxxy \
   --volume=/mnt/proxxy/cache:/var/cache/proxxy \
   --volume=/mnt/proxxy/logs:/var/log/proxxy \
   proxxy
+docker stop proxxy

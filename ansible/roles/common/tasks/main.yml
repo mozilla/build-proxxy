@@ -1,6 +1,6 @@
 - name: apt-get update
   sudo: true
-  apt: update_cache=true
+  apt: update_cache=true cache_valid_time=3600
 
 - name: install packages
   sudo: true

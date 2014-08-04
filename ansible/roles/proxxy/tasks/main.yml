@@ -43,23 +43,6 @@
     dest="{{ proxxy.dir }}/packer/diamond.conf"
     mode=0600
 
-- name: create ~/.ec2 directory
-  file: >
-    path=~/.ec2
-    state=directory
-
-- name: copy EC2 certificate
-  copy: >
-    content='{{ proxxy.packer.ec2_ceriticate }}'
-    dest=~/.ec2/cert.pem
-    mode=0644
-
-- name: copy EC2 private key
-  copy: >
-    content='{{ proxxy.packer.ec2_private_key }}'
-    dest=~/.ec2/pk.pem
-    mode=0600
-
 - name: generate .envrc
   template: >
     src=envrc.j2
