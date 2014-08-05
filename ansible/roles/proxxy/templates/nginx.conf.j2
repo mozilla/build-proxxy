@@ -30,6 +30,11 @@ http {
   proxy_cache_lock on;
   proxy_cache_lock_timeout 10m;
 
+  {% if 'max_concurrent_requests' in proxxy.config: %}
+    limit_conn_zone $server_name zone=total:1m;
+    limit_conn total {{ proxxy.config.max_concurrent_requests }};
+  {% endif %}
+
   server {
     listen 80;
     server_name _;
