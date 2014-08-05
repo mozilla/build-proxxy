@@ -158,41 +158,51 @@ def update_asg(ami, name='proxxy', region='us-east-1'):
 
     # switch autoscaling group from old LC to new LC
     autoscale_group.launch_config_name = new_launch_config_name
-    autoscale_group.update()
+    result = autoscale_group.update()
+    print vars(result)
 
     # delete old launch configuration
-    old_launch_config.delete();
+    old_launch_config.delete()
 
     print "Done"
 
 @task
-def rotate_asg(name='proxxy', region='us-east-1', min_healthy_instances=2):
+def rotate_asg(name='proxxy', region='us-east-1'):
     """Perform a rolling restart on Proxxy autoscaling group"""
 
     ec2 = boto.ec2.connect_to_region(region)
+    elb = boto.ec2.elb.connect_to_region(region)
     autoscale = boto.ec2.autoscale.connect_to_region(region)
 
     autoscale_group = autoscale.get_all_groups(names=[name])[0]
+    load_balancers = elb.get_all_load_balancers(load_balancer_names=autoscale_group.load_balancers)
+
     old_instances = copy.copy(autoscale_group.instances)
 
+    original_min_size = autoscale_group.min_size
     original_desired_capacity = autoscale_group.desired_capacity
-    if original_desired_capacity < min_healthy_instances:
-        print "Temporarily increasing desired capacity to %s" % min_healthy_instances
-        autoscale_group.desired_capacity = min_healthy_instances
+    min_instances_in_service = max(2, original_min_size)
+    if original_min_size < min_instances_in_service:
+        print "Temporarily increasing min size to %s" % min_instances_in_service
+        autoscale_group.min_size = min_instances_in_service
+        autoscale_group.desired_capacity = max(autoscale_group.min_size, autoscale_group.desired_capacity)
         autoscale_group.update()
+        time.sleep(5)
 
-    wait_for_healthy_instances(autoscale, name, min_healthy_instances)
+    wait_for_instances_in_service(load_balancers, min_count=min_instances_in_service)
 
     for old_instance in old_instances:
         print "Terminating instance %s" % old_instance.instance_id
         autoscale.terminate_instance(old_instance.instance_id, decrement_capacity=False)
-        time.sleep(5)
-        wait_for_healthy_instances(autoscale, name, min_healthy_instances)
+        time.sleep(30)
+        wait_for_instances_in_service(load_balancers, min_count=min_instances_in_service)
 
-    if original_desired_capacity < min_healthy_instances:
-        print "Decreasing desired capacity back to %s" % original_desired_capacity
+    if original_min_size < min_instances_in_service:
+        print "Decreasing min size back to %s" % original_min_size
+        autoscale_group.min_size = original_min_size
         autoscale_group.desired_capacity = original_desired_capacity
         autoscale_group.update()
+        time.sleep(5)
 
     print "Done"
 
@@ -208,9 +218,30 @@ def wait_for_healthy_instances(autoscale, asg_name, min_count = 2):
         if count < min_count:
             print "Need at least {} instances in service to continue, got {}, waiting...".format(min_count, count)
             time.sleep(30)
-            asg.update();
+            asg.update()
         else:
             break
+
+def wait_for_instances_in_service(load_balancers, min_count=2, delay=30):
+    print "Waiting for at least {} instances to be in service".format(min_count)
+    print "(please be patient, this may take more than 5 minutes)"
+
+    loop = True
+    while loop:
+        loop = False
+        for load_balancer in load_balancers:
+            healthes = load_balancer.get_instance_health()
+            in_service = sum(health.state == 'InService' for health in healthes)
+
+            print "ELB {}: {} / {} instances in service".format(load_balancer.name, in_service, len(healthes))
+
+            if in_service < min_count:
+                loop = True
+
+        if loop:
+            print "Waiting..."
+            time.sleep(delay)
+
 
 def delete_bundle(manifest_location):
     s3 = boto.connect_s3()
