@@ -289,6 +289,9 @@ def _destroy_image(image):
 
         print "Deregistering AMI"
         image.deregister()
+    elif image.root_device_type == 'ebs':
+        print "Deregistering AMI"
+        image.deregister(delete_snapshot=True)
     else:
         print "Unsupported root device type: %s" % image.root_device_type
         return
