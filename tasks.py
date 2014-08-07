@@ -21,13 +21,13 @@ from boto.ec2.blockdevicemapping import BlockDeviceMapping
 def docker_build(tag="proxxy"):
     """Build Proxxy Docker image"""
 
-    run("docker build --tag {} ./app".format(tag))
+    run("docker build --tag {} ./app".format(tag), pty=True)
 
 @task
 def docker_run(tag="proxxy"):
     """Run Proxxy Docker container"""
 
-    run("docker run --tty --interactive --rm --publish 80:80 {}".format(tag))
+    run("docker run --tty --interactive --privileged --rm --publish 80:80 --name proxxy {}".format(tag), pty=True)
 
 @task
 def packer_build(region=None):
@@ -40,7 +40,7 @@ def packer_build(region=None):
     cmd = " ".join(cmd)
 
     os.chdir("packer")
-    run(cmd)
+    run(cmd, pty=True)
 
 @task
 def cleanup_images(region='us-east-1', keep=3):

@@ -1,7 +1,6 @@
 proxxy:
   skip_git_clone: true
   config:
-    max_concurrent_requests: 50
     backends:
       ftp.mozilla.org:
         path: https://ftp.mozilla.org/

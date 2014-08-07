@@ -6,6 +6,9 @@ if [ ! -f nginx.conf ]; then
   exit 1
 fi
 
+echo "Applying sysctl tweaks..."
+service procps start
+
 echo "Starting nginx..."
 nginx -c /proxxy/nginx.conf
 
