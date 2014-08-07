@@ -30,12 +30,17 @@ def docker_run(tag="proxxy"):
     run("docker run --tty --interactive --privileged --rm --publish 80:80 --name proxxy {}".format(tag), pty=True)
 
 @task
-def packer_build(region=None):
+def packer_build(name="proxxy", region=None):
     """Build Proxxy AMI using Packer"""
 
     cmd = ["packer build"]
+
     if region is not None:
         cmd.append("-only proxxy-{}".format(region))
+
+    if name is not None:
+        cmd.append("-var 'name={}'".format(name))
+
     cmd.append("template.json")
     cmd = " ".join(cmd)
 

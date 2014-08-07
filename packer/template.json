@@ -2,6 +2,7 @@
   "variables": {
     "aws_access_key": "{{env `AWS_ACCESS_KEY`}}",
     "aws_secret_key": "{{env `AWS_SECRET_KEY`}}",
+    "name": "proxxy",
     "instance_type": "m3.xlarge"
   },
   "builders": [{
@@ -9,7 +10,7 @@
     "type": "amazon-ebs",
     "access_key": "{{user `aws_access_key`}}",
     "secret_key": "{{user `aws_secret_key`}}",
-    "ami_name": "proxxy us-east-1 {{timestamp}}",
+    "ami_name": "{{user `name`}} us-east-1 {{timestamp}}",
     "region": "us-east-1",
     "source_ami": "ami-b227efda",
     "instance_type": "{{user `instance_type`}}",
@@ -19,7 +20,7 @@
     "type": "amazon-ebs",
     "access_key": "{{user `aws_access_key`}}",
     "secret_key": "{{user `aws_secret_key`}}",
-    "ami_name": "proxxy us-west-2 {{timestamp}}",
+    "ami_name": "{{user `name`}} us-west-2 {{timestamp}}",
     "region": "us-west-2",
     "source_ami": "ami-8386feb3",
     "instance_type": "{{user `instance_type`}}",
