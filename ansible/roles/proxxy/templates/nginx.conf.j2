@@ -1,74 +1,36 @@
-user root;
-
+user www-data;
 worker_processes auto;
+pid /run/nginx.pid;
+
 events {
-  worker_connections 4096;
+	worker_connections 4096;
+	multi_accept on;
 }
 
 http {
-  sendfile on;
-  tcp_nopush on;
-  tcp_nodelay on;
-  keepalive_timeout 65;
-  types_hash_max_size 2048;
-  server_names_hash_bucket_size 128;
+	sendfile on;
+	tcp_nopush on;
+	tcp_nodelay on;
+	keepalive_timeout 65;
+	types_hash_max_size 2048;
+	# server_tokens off;
 
-  include /etc/nginx/mime.types;
-  default_type application/octet-stream;
+	server_names_hash_bucket_size 64;
 
-  log_format proxxy '$remote_addr - $upstream_cache_status - '
-                    '[$upstream_response_time / $request_time] '
-                    '$host [$time_local]  '
-                    '"$request" $status $body_bytes_sent '
-                    '"$http_referer" "$http_user_agent"';
+	include /etc/nginx/mime.types;
+	default_type application/octet-stream;
 
-  access_log /var/log/proxxy/access.log proxxy;
-  error_log  /var/log/proxxy/error.log;
+	##
+	# Logging Settings
+	##
 
-  proxy_temp_path   /var/cache/proxxy/tmp;
-  proxy_ignore_headers  Expires Cache-Control Set-Cookie;
-  proxy_cache_lock on;
-  proxy_cache_lock_timeout 10m;
+	access_log /var/log/nginx/access.log;
+	error_log /var/log/nginx/error.log;
 
-  {% if 'max_concurrent_requests' in proxxy.config: %}
-    limit_conn_zone $server_name zone=total:1m;
-    limit_conn total {{ proxxy.config.max_concurrent_requests }};
-  {% endif %}
+	##
+	# Virtual Host Configs
+	##
 
-  server {
-    listen 80;
-    server_name _;
-
-    location / {
-      return 404;
-    }
-
-    location /heartbeat {
-      default_type text/plain;
-      return 200 "200 OK";
-    }
-  }
-
-  {% for name, params in proxxy.config.backends.iteritems() -%}
-  proxy_cache_path  /var/cache/proxxy/{{ name }} levels=1:2 keys_zone={{ name }}:8m max_size={{ params['size'] }} inactive={{ params['ttl'] }};
-
-  server {
-    listen 80;
-    server_name {{ name }}.*;
-
-    location / {
-      add_header X-Proxxy $upstream_cache_status;
-      proxy_pass {{ params['path'] }};
-      proxy_cache {{ name }};
-      proxy_cache_valid {{ params['ttl'] }};
-      {% if 'username' in params and 'password' in params -%}
-        proxy_set_header Authorization "Basic {{ (params['username'] + ':' + params['password']) | b64encode }}";
-        proxy_hide_header WWW-Authenticate;
-      {%- endif %}
-
-    }
-  }
-
-  {% endfor %}
-
+	include /etc/nginx/conf.d/*.conf;
+	include /etc/nginx/sites-enabled/*;
 }

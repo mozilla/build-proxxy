@@ -1,0 +1,6 @@
+input {
+  file {
+    path => "/var/log/proxxy/*.access.log"
+    codec => json_lines
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "variables": {
+    "name": "elasticsearch",
+    "instance_type": "m3.xlarge",
+    "aws_access_key": "{{env `AWS_ACCESS_KEY`}}",
+    "aws_secret_key": "{{env `AWS_SECRET_KEY`}}"
+  },
+  "builders": [{
+    "type": "null",
+    "host": "proxxy.dev",
+    "ssh_username": "vagrant",
+    "ssh_password": "vagrant"
+  }],
+  "provisioners": [
+    {
+      "type": "shell",
+      "scripts": [
+        "common.sh",
+        "ansible.sh"
+      ]
+    },
+    {
+      "type": "ansible-local",
+      "playbook_file": "elasticsearch/playbook.yml",
+      "playbook_dir": "../ansible"
+    }
+  ]
+}

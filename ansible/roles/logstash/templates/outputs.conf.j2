@@ -1,0 +1,7 @@
+output {
+  {% for output in logstash.outputs %}
+    {{ output.type }} {
+      host => {{ output.host }}
+    }
+  {% endfor %}
+}

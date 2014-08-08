@@ -1,57 +1,47 @@
-- name: install Python
-  sudo: true
-  apt: pkg={{ item }}
-  with_items:
-    - python
-    - python-pip
-
-- name: install Python packages
-  sudo: true
-  pip: name={{ item }}
-  with_items:
-    - invoke
-    - boto
-
-- name: create directory
+- name: create log directory
   sudo: true
   file: >
-    path={{ proxxy.dir }}
+    path=/var/log/proxxy
+    owner=root
+    group=root
+    mode=0755
     state=directory
-    recurse=true
-    owner={{ ansible_ssh_user }}
-    group={{ ansible_ssh_user }}
-  when: not proxxy.skip_git_clone
 
-- name: clone repository
-  git: >
-    repo={{ proxxy.repo }}
-    dest={{ proxxy.dir }}
-    version={{ proxxy.version }}
-  notify:
-    - rebuild proxxy
-  when: not proxxy.skip_git_clone
+- name: create cache directory
+  sudo: true
+  file: >
+    path=/var/cache/proxxy
+    owner=www-data
+    group=root
+    mode=0770
+    state=directory
 
-- name: generate app/nginx.conf
+- name: generate nginx.conf
+  sudo: true
   template: >
     src=nginx.conf.j2
-    dest="{{ proxxy.dir }}/app/nginx.conf"
+    dest=/etc/nginx/nginx.conf
+    owner=root
+    group=root
     mode=0600
+  notify: reload nginx
 
-- name: generate packer/diamond.conf
+- name: generate vhosts
+  sudo: true
   template: >
-    src=diamond.conf.j2
-    dest="{{ proxxy.dir }}/packer/diamond.conf"
+    src=nginx-vhosts.conf.j2
+    dest=/etc/nginx/sites-enabled/proxxy
+    owner=root
+    group=root
     mode=0600
+  notify: reload nginx
 
-- name: generate .envrc
+- name: generate logstash config
+  sudo: true
   template: >
-    src=envrc.j2
-    dest="{{ proxxy.dir }}/.envrc"
+    src=logstash.conf.j2
+    dest=/etc/logstash/conf.d/proxxy.conf
+    owner=root
+    group=root
     mode=0644
-
-- name: allow .envrc
-  command: >
-    /usr/local/bin/direnv allow
-    chdir={{ proxxy.dir }}
-  register: result
-  changed_when: result.rc != 0
+  notify: restart logstash

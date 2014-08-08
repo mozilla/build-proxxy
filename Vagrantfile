@@ -5,18 +5,20 @@
 VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.define "proxxy.dev", primary: true
+
   config.vm.box = "ubuntu/trusty64"
   config.vm.hostname = "proxxy.dev"
   config.vm.network "private_network", ip: "10.0.31.2"
   config.vm.synced_folder ".", "/opt/proxxy", :nfs => true
 
-  config.vm.provision :ansible do |ansible|
-    ansible.playbook = "ansible/proxxy.yml"
-    ansible.vault_password_file = ".vaultpass"
+  config.vm.provider "virtualbox" do |v|
+    v.memory = 1024
+  end
 
-    ansible.groups = {
-      "proxxy" => ["default"],
-      "vagrant:children" => ["proxxy"]
-    }
+  config.vm.provision :ansible do |ansible|
+    ansible.playbook = "ansible/all.yml"
+    ansible.inventory_path = "ansible/vagrant.ini"
+    ansible.limit = "all"
   end
 end

@@ -1,8 +1,0 @@
-default         0
-timeout         0
-hiddenmenu
-
-title           Ubuntu
-root            (hd0)
-kernel          /boot/vmlinuz-%KERNEL_RELEASE% %KERNEL_LINE%
-initrd          /boot/initrd.img-%KERNEL_RELEASE%
