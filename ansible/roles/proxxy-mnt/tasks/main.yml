@@ -1,0 +1,15 @@
+- name: generate upstart task
+  sudo: true
+  template: >
+    src=upstart.conf.j2
+    dest=/etc/init/proxxy-mnt.conf
+    owner=root
+    group=root
+    mode=0644
+  when: mnt.enabled
+
+- name: run upstart task
+  sudo: true
+  service: name=proxxy-mnt state=started
+  changed_when: false
+  when: mnt.enabled

@@ -4,7 +4,6 @@ proxxy
 Directories
 -----------
 
-* `app` - the app code itself
 * `ansible` - [Ansible](http://docs.ansible.com/) files
 * `packer` - [Packer](http://www.packer.io/) files
 
@@ -14,69 +13,73 @@ Requirements
 
 * [Ansible 1.6+](http://docs.ansible.com/)
 * [Vagrant 1.6+](http://www.vagrantup.com/)
+* [Packer 0.6+](http://www.packer.io/) (only for generating production AMIs)
 * Ansible Vault password in `.vaultpass` file
 
 
 Development / testing
 ---------------------
 
-    vagrant up
-    vagrant ssh
-    cd /opt/proxxy
-    inv docker_build  # build a Docker image
-    inv docker_run    # run a Docker container from an image
+First, add the following lines to your `/etc/hosts`:
 
+    # proxxy
+    10.0.31.2       proxxy.dev
+    10.0.31.2       es.proxxy.dev
+    10.0.31.2       ftp.mozilla.org.proxxy.dev
+
+Next, run `vagrant up`.
+That will boot up a fresh VM and install / launch Proxxy.
+
+Proxxy is automatically provisioned by applying the following Ansible role: `ansible/roles/proxxy`
+When you modify it, you should reprovision the VM using `vagrant provision` to see your changes.
+
+You can visit [ftp.mozilla.org.proxxy.dev](http://ftp.mozilla.org.proxxy.dev) to
+check that Proxxy works.
+
+You can then visit [es.proxxy.dev](http://es.proxxy.dev) to see
+nginx log entries in [Kibana](http://www.elasticsearch.org/overview/kibana/).
 
 Production workflow
---------------------
+-------------------
 
-The main config is at `ansible/group_vars/vagrant`, encrypted using
+Both Proxxy and Kibana+Elasticsearch are installed in the same VM in development,
+but in production you'll want to have two separate VMs.
+
+First, destroy existing development VM, if present:
+
+    vagrant destroy -f
+
+Next, create a fresh VM without provisioning:
+
+    vagrant up --no-provision
+
+The production config is at `ansible/group_vars/production`, encrypted using
 [Ansible Vault](http://docs.ansible.com/playbooks_vault.html).
 
 View / edit secrets in $EDITOR:
 
     ansible-vault edit --vault-password-file=.vaultpass ansible/group_vars/vagrant
 
-Then:
+Provision the VM using Packer.
+**Please keep in mind that this VM will be provisioned with production secrets,
+so please keep it private!**
 
-    vagrant provision
-    vagrant ssh
-    cd /opt/proxxy
+    cd packer
+    packer build -only vagrant elasticsearch.json
+    # OR
+    packer build -only vagrant proxxy.json
 
-Build a fresh AMIs using Packer in all supported regions:
+You should apply either elasticsearch or proxxy template and test those services separately.
 
-    inv packer_build
+Once you've checked that VM works fine, you can build fresh production AMIs like this:
 
-Optionally you can build a fresh AMI in a specific region:
+    packer build -except vagrant elasticsearch.json
+    packer build -except vagrant proxxy.json
 
-    in packer_build --region=<region>
+Both elasticsearch and proxxy produce multiple AMIs, one per region.
+You can generate AMI for a specific region like this:
 
-**The following steps should be performed for all supported regions (`us-east-1` and `us-west-2`).**
+    packer build -only ec2-usw2 proxxy.json
 
-You can see the list of Proxxy AMIs:
-
-    inv list_images --region=<region>
-
-You should test a freshly built AMI:
-
-    inv launch_instance <ami-id> --region=<region>
-
-When done, destroy testing instance:
-
-    inv destroy_instance <instance-id> --region=<region>
-
-Update production autoscaling group's launch configuration with the new AMI:
-
-    inv update_asg <ami-id> --region=<region>
-
-Next, perform a rolling restart of all instances in autoscaling group to make use of new AMI launch configuration:
-
-    inv rotate_asg --region=<region>
-
-You can manually destroy old AMIs:
-
-    inv destroy_image <ami-id> --region=<region>
-
-Or just perform an automatic AMI cleanup - by default this will keep 3 most recent AMIs:
-
-    inv cleanup_images --region=<region>
+Once the AMIs are built, launch them, test them and rebind Elastic IPs
+to put them into service.

@@ -26,3 +26,32 @@
     group=root
     mode=0644
   notify: restart elasticsearch
+
+- name: enable
+  sudo: true
+  service: name=elasticsearch enabled=true
+
+- name: install python-passlib
+  sudo: true
+  apt: pkg=python-passlib
+
+- name: generate htpasswd
+  sudo: true
+  htpasswd: >
+    path=/etc/nginx/elasticsearch.htpasswd
+    name={{ elasticsearch.username }}
+    password={{ elasticsearch.password }}
+    owner=root
+    group=www-data
+    mode=0640
+  notify: reload nginx
+
+- name: generate vhost
+  sudo: true
+  template: >
+    src=nginx.conf.j2
+    dest=/etc/nginx/sites-enabled/elasticsearch
+    owner=root
+    group=root
+    mode=0644
+  notify: reload nginx

@@ -1,3 +1,3 @@
 - name: restart logstash
   sudo: true
-  service: name=logstash state=restarted
+  service: name=logstash state=restarted sleep=10

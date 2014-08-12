@@ -1,6 +1,15 @@
 input {
   file {
     path => "/var/log/proxxy/*.access.log"
-    codec => json_lines
+    codec => json
+  }
+}
+
+output {
+  elasticsearch_http {
+    host => "{{ proxxy.logstash.elasticsearch_host }}"
+    port => "{{ proxxy.logstash.elasticsearch_port }}"
+    user => "{{ proxxy.logstash.elasticsearch_user }}"
+    password => "{{ proxxy.logstash.elasticsearch_password }}"
   }
 }

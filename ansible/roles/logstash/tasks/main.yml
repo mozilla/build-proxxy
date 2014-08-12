@@ -1,3 +1,7 @@
+- name: install java
+  sudo: true
+  apt: pkg=openjdk-7-jre-headless state=latest
+
 - name: download
   sudo: true
   get_url: >
@@ -11,14 +15,4 @@
 - name: install
   sudo: true
   apt: deb=/opt/logstash.deb
-  notify: restart logstash
-
-- name: generate outputs.conf
-  sudo: true
-  template: >
-    src=outputs.conf.j2
-    dest=/etc/logstash/conf.d/outputs.conf
-    owner=root
-    group=root
-    mode=0644
   notify: restart logstash

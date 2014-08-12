@@ -1,12 +1,8 @@
 proxxy:
-  repo: git@github.com:laggyluke/proxxy.git
-  version: master
-  dir: /opt/proxxy
-  autostart: true
-  skip_git_clone: false
   config:
     backends: {}
-  packer:
-    aws_access_key: ~
-    aws_secret_key: ~
-    hostedgraphite_api_key: ~
+  logstash:
+    elasticsearch_host: localhost
+    elasticsearch_port: 9292
+    elasticsearch_user: elasticsearch
+    elasticsearch_password: elasticsearch

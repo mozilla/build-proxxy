@@ -1,0 +1,5 @@
+proxxy_mnt:
+  enabled: false
+  directories:
+    /mnt/proxxy/logs: /var/log/proxxy
+    /mnt/proxxy/cache: /var/cache/proxxy

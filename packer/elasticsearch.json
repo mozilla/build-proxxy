@@ -1,15 +1,36 @@
 {
   "variables": {
-    "name": "elasticsearch",
+    "name": "proxxy-elasticsearch",
     "instance_type": "m3.xlarge",
     "aws_access_key": "{{env `AWS_ACCESS_KEY`}}",
     "aws_secret_key": "{{env `AWS_SECRET_KEY`}}"
   },
   "builders": [{
+    "name": "vagrant",
     "type": "null",
     "host": "proxxy.dev",
     "ssh_username": "vagrant",
     "ssh_password": "vagrant"
+  }, {
+    "name": "ec2-use1",
+    "type": "amazon-ebs",
+    "access_key": "{{user `aws_access_key`}}",
+    "secret_key": "{{user `aws_secret_key`}}",
+    "ami_name": "{{user `name`}} us-east-1 {{timestamp}}",
+    "region": "us-east-1",
+    "source_ami": "ami-b227efda",
+    "instance_type": "{{user `instance_type`}}",
+    "ssh_username": "ubuntu"
+  }, {
+    "name": "ec2-usw2",
+    "type": "amazon-ebs",
+    "access_key": "{{user `aws_access_key`}}",
+    "secret_key": "{{user `aws_secret_key`}}",
+    "ami_name": "{{user `name`}} us-west-2 {{timestamp}}",
+    "region": "us-west-2",
+    "source_ami": "ami-8386feb3",
+    "instance_type": "{{user `instance_type`}}",
+    "ssh_username": "ubuntu"
   }],
   "provisioners": [
     {
@@ -20,9 +41,24 @@
       ]
     },
     {
+      "type": "file",
+      "source": "../.vaultpass",
+      "destination": "/tmp/vaultpass"
+    },
+    {
+      "type": "shell",
+      "inline": ["chmod 600 /tmp/vaultpass"]
+    },
+    {
       "type": "ansible-local",
+      "inventory_file": "elasticsearch/inventory.ini",
       "playbook_file": "elasticsearch/playbook.yml",
-      "playbook_dir": "../ansible"
+      "playbook_dir": "../ansible",
+      "extra_arguments": "--vault-password-file=/tmp/vaultpass"
+    },
+    {
+      "type": "shell",
+      "inline": ["rm -f /tmp/vaultpass"]
     }
   ]
 }

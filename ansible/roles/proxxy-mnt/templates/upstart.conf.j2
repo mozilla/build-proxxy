@@ -1,0 +1,13 @@
+start on mounted MOUNTPOINT=/mnt
+
+task
+script
+  {% for k, v in proxxy_mnt.directories.iteritems() %}
+    mkdir -p "{{ k }}"
+    chown www-data:root "{{ k }}"
+    chmod 755 "{{ k }}"
+    if [ ! -f "{{ v }}" ]; then
+      ln -s "{{ k }}" "{{ v }}"
+    fi
+  {% endfor %}
+end script

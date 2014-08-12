@@ -32,20 +32,11 @@
     group=root
     mode=0644
 
-- name: install python-passlib
+- name: switch default dashboard to logstash
   sudo: true
-  apt: pkg=python-passlib
-
-- name: generate htpasswd
-  sudo: true
-  htpasswd: >
-    path=/etc/nginx/kibana.htpasswd
-    name={{ kibana.username }}
-    password={{ kibana.password }}
-    owner=root
-    group=www-data
-    mode=0640
-  notify: reload nginx
+  command: >
+    mv /opt/kibana/app/dashboards/logstash.json /opt/kibana/app/dashboards/default.json
+    removes=/opt/kibana/app/dashboards/logstash.json
 
 - name: generate vhost
   sudo: true
