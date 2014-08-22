@@ -45,3 +45,4 @@
     group=logstash
     mode=0640
   notify: restart logstash
+  when: proxxy.logstash.enabled

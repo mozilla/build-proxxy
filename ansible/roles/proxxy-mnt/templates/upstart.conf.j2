@@ -6,7 +6,7 @@ script
     mkdir -p "{{ k }}"
     chown www-data:root "{{ k }}"
     chmod 755 "{{ k }}"
-    if [ ! -f "{{ v }}" ]; then
+    if [ ! -e "{{ v }}" ]; then
       ln -s "{{ k }}" "{{ v }}"
     fi
   {% endfor %}

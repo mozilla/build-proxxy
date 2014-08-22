@@ -6,7 +6,3 @@ proxxy:
         path: https://ftp.mozilla.org/
         size: 16g
         ttl: 1d
-      runtime-binaries.pvt.build.mozilla.org:
-        path: http://runtime-binaries.pvt.build.mozilla.org
-        size: 16g
-        ttl: 1d

@@ -2,6 +2,7 @@ proxxy:
   config:
     backends: {}
   logstash:
+    enabled: true
     elasticsearch_host: localhost
     elasticsearch_port: 9292
     elasticsearch_user: elasticsearch
