@@ -6,3 +6,7 @@ proxxy:
         path: https://ftp.mozilla.org/
         size: 16g
         ttl: 1d
+      pypi.pub.build.mozilla.org:
+        path: http://pypi.pub.build.mozilla.org/
+        size: 16g
+        ttl: 1d
