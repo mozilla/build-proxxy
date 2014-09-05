@@ -10,3 +10,7 @@ proxxy:
         path: http://pypi.pub.build.mozilla.org/
         size: 16g
         ttl: 1d
+      s3:
+        path: https://s3.amazonaws.com/
+        size: 16g
+        ttl: 1d
