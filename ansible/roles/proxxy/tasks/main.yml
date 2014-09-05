@@ -46,3 +46,12 @@
     mode=0640
   notify: restart logstash
   when: proxxy.logstash.enabled
+
+- name: generate logrotate config
+  sudo: true
+  template: >
+    src=logrotate.conf.j2
+    dest=/etc/logrotate.d/proxxy
+    owner=root
+    group=root
+    mode=0644
