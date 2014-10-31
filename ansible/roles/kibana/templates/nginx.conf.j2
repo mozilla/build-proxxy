@@ -1,9 +1,0 @@
-server {
-  server_name {{ kibana.hostname }};
-  access_log  /var/log/nginx/{{ kibana.hostname }}.access.log;
-
-  location / {
-    root    /opt/kibana;
-    index   index.html;
-  }
-}
